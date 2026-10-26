@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>لیو ترید | تبدیل</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131e31;--line:#283853;--txt:#edf3ff;--muted:#9eb0cb;--green:#4ce0aa;--red:#ff7185;--blue:#83aaff;--gold:#f4ce74}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#111d34,#080d18 55%);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;line-height:1.65}
+main{max-width:980px;margin:auto;padding:calc(16px + env(safe-area-inset-top)) 13px calc(28px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.brand{font-size:25px;font-weight:900}.brand span{color:var(--green)}.tag{border:1px solid #2d705e;background:#143327;color:#b9ffdf;padding:4px 10px;border-radius:999px;font-size:12px}
+p{margin:5px 0;color:var(--muted)}.notice{margin:15px 0;padding:12px;border:1px solid #68562b;background:#2c2517;color:#f7e1a0;border-radius:12px;font-size:13px}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.controls{margin:14px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:rgba(19,30,49,.96);border:1px solid var(--line);border-radius:16px;padding:15px;min-width:0}.wide{grid-column:1/-1}.label{font-size:12px;color:var(--muted)}.value{font-size:24px;font-weight:800;overflow-wrap:anywhere}.small{font-size:12px;color:var(--muted)}.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.gold{color:var(--gold)}
+button,select,input{font:inherit;color:var(--txt);background:#0b1425;border:1px solid #344661;border-radius:10px;padding:10px 12px;max-width:100%}button{background:#21483f;border-color:#347663;font-weight:750;cursor:pointer}button.secondary{background:#1a2941;border-color:#354966}button.danger{background:#47202b;border-color:#773341}button:disabled{opacity:.55}.status{font-size:13px;color:var(--muted);margin-top:7px}.rule{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px}.field input,.field select{width:100%}.metric{display:grid;grid-template-columns:1fr 1fr;gap:10px}.signal{font-size:19px;font-weight:800}.footer{margin-top:15px;font-size:12px;color:var(--muted)}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.value{font-size:22px}.card{padding:13px}.brand{font-size:23px}}
+</style></head>
+<body><main>
+<header><div><div class="brand">لیو <span>ترید</span></div><p>نسخه آزمایشی اختصاصی صرافی تبدیل</p></div><span class="tag">فقط معاملات فرضی</span></header>
+<div class="notice">این برنامه فعلاً فقط اطلاعات عمومی بازار تبدیل را می‌خواند و خریدوفروش واقعی انجام نمی‌دهد. اگر API از مرورگر یا شبکه در دسترس نباشد، خطا را نشان می‌دهد و قیمت ساختگی را جای قیمت واقعی نمی‌گذارد.</div>
+<div class="row controls">
+ <label class="small" for="symbol">بازار</label>
+ <select id="symbol"><option value="BTCIRT">بیت‌کوین / تومان</option><option value="ETHIRT">اتریوم / تومان</option><option value="USDTIRT">تتر / تومان</option><option value="BTCUSDT">بیت‌کوین / تتر</option><option value="ETHUSDT">اتریوم / تتر</option><option value="BNBIRT">بایننس‌کوین / تومان</option><option value="SOLIRT">سولانا / تومان</option></select>
+ <button id="refresh">دریافت قیمت</button><button class="secondary" id="auto">به‌روزرسانی خودکار: خاموش</button>
+</div>
+<section class="grid">
+ <div class="card"><div class="label">آخرین معامله در تبدیل</div><div id="price" class="value">در انتظار دریافت…</div><div id="unit" class="small">قیمت واقعی هنوز دریافت نشده</div></div>
+ <div class="card"><div class="label">وضعیت اتصال</div><div id="status" class="value" style="font-size:18px">آماده</div><div id="updated" class="small">هنوز به‌روزرسانی نشده</div></div>
+ <div class="card"><div class="label">EMA کوتاه / بلند</div><div id="ema" class="value">—</div><div id="emaNote" class="small">بعد از دریافت معاملات اخیر</div></div>
+ <div class="card"><div class="label">RSI تقریبی</div><div id="rsi" class="value">—</div><div id="rsiNote" class="small">بر اساس قیمت معاملات اخیر، نه کندل کامل</div></div>
+ <div class="card wide"><div class="label">برداشت تحلیلی آزمایشی</div><div id="signal" class="signal blue">داده کافی نیست</div><div id="reason" class="small">برای تحلیل بهتر به تاریخچهٔ کندل‌ها و آزمون گذشته‌نگر نیاز است.</div></div>
+ <div class="card wide"><strong>آخرین معاملات بازار</strong><p class="small">این فهرست از معاملات عمومی اخیر تبدیل گرفته می‌شود.</p><div class="tablewrap"><table><thead><tr><th>قیمت</th><th>مقدار</th><th>زمان</th><th>جهت آغازگر</th></tr></thead><tbody id="trades"><tr><td colspan="4">هنوز داده‌ای دریافت نشده</td></tr></tbody></table></div></div>
+ <div class="card wide"><strong>معامله فرضی</strong><p class="small">خرید و فروش فقط در دفتر آزمایشی همین مرورگر ثبت می‌شود؛ هیچ سفارشی به تبدیل ارسال نمی‌شود.</p>
+ <div class="row" style="margin-top:10px">
+  <label class="field">مبلغ سرمایه (تومان یا تتر)<input id="capital" type="number" min="1" value="1000000" inputmode="decimal"></label>
+  <label class="field">کارمزد فرضی هر سمت (%)<input id="fee" type="number" min="0" max="5" step="0.01" value="0.2" inputmode="decimal"></label>
+ </div>
+ <div class="row" style="margin-top:10px"><button id="buy">ثبت خرید فرضی با قیمت فعلی</button><button id="sell" class="secondary">فروش فرضی دارایی موجود</button></div>
+ <div id="paperStatus" class="status">برای ثبت معامله، ابتدا قیمت واقعی دریافت شود.</div>
+ <div class="metric rule"><div><div class="label">ارزش دارایی فرضی</div><div id="holding" class="value">۰</div></div><div><div class="label">سود/زیان تحقق‌نیافته</div><div id="pnl" class="value">۰</div></div></div>
+ <div class="row" style="margin-top:12px"><strong>دفتر معاملات فرضی</strong><span style="flex:1"></span><button id="clear" class="danger">پاک کردن دفتر</button></div>
+ <div class="tablewrap"><table><thead><tr><th>نوع</th><th>قیمت</th><th>مقدار</th><th>هزینه/دریافتی</th><th>زمان</th></tr></thead><tbody id="ledger"><tr><td colspan="5">هنوز معامله‌ای ثبت نشده</td></tr></tbody></table></div>
+ </div>
+</section>
+<div class="footer">نسخهٔ اولیه · قیمت‌ها از API عمومی تبدیل دریافت می‌شوند. EMA/RSI این نسخه تقریبی و مبتنی بر آخرین معاملات است و به‌تنهایی توصیه خریدوفروش نیست. اطلاعات دفتر فرضی فقط روی همین مرورگر ذخیره می‌شود.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id), API='https://api1.tabdeal.org/r/api/v1/';
+let lastPrice=null, lastTrades=[], timer=null, autoOn=false, symbol='BTCIRT';
+const fmt=(n,max=4)=>Number(n).toLocaleString('fa-IR',{maximumFractionDigits:max});
+const money=(n)=>Number(n).toLocaleString('fa-IR',{maximumFractionDigits:2});
+function quote(){return symbol.endsWith('IRT')?'تومان':symbol.endsWith('USDT')?'تتر':''}
+function loadLedger(){try{return JSON.parse(localStorage.getItem('leo_tabdeal_paper_'+symbol)||'[]')}catch{return []}}
+function saveLedger(rows){localStorage.setItem('leo_tabdeal_paper_'+symbol,JSON.stringify(rows))}
+function ema(values,period){if(values.length<period)return null;const k=2/(period+1);let e=values.slice(0,period).reduce((a,b)=>a+b,0)/period;for(let i=period;i<values.length;i++)e=values[i]*k+e*(1-k);return e}
+function calcRSI(values,period=14){if(values.length<period+1)return null;let up=0,down=0;for(let i=values.length-period;i<values.length;i++){const d=values[i]-values[i-1];if(d>0)up+=d;else down-=d}if(down===0)return 100;return 100-100/(1+up/down)}
+function paintAnalysis(){
+ const vals=lastTrades.slice().reverse().map(t=>Number(t.price)).filter(Number.isFinite);
+ const e1=ema(vals,5),e2=ema(vals,12),r=calcRSI(vals);
+ $('ema').textContent=e1&&e2?fmt(e1,quote()==='تومان'?0:6)+' / '+fmt(e2,quote()==='تومان'?0:6):'داده ناکافی';
+ $('emaNote').textContent=e1&&e2?(e1>e2?'EMA کوتاه بالاتر از بلند':'EMA کوتاه پایین‌تر از بلند'):'برای EMA به معاملات بیشتری نیاز است';
+ $('rsi').textContent=r===null?'داده ناکافی':fmt(r,1);
+ $('rsiNote').textContent=r===null?'حداقل ۱۵ قیمت اخیر لازم است':r>=70?'بالای ۷۰: احتمال داغ‌شدن کوتاه‌مدت بازار':r<=30?'زیر ۳۰: احتمال فشار فروش زیاد':'بین ۳۰ و ۷۰: محدوده میانی';
+ if(e1&&e2&&r!==null){if(e1>e2&&r<70){$('signal').textContent='تمایل صعودی در داده‌های اخیر';$('signal').className='signal green';$('reason').textContent='EMA کوتاه بالاتر است؛ این فقط یک نشانهٔ ساده است، نه تضمین ادامه رشد.'}else if(e1<e2&&r>30){$('signal').textContent='تمایل نزولی در داده‌های اخیر';$('signal').className='signal red';$('reason').textContent='EMA کوتاه پایین‌تر است؛ این نشانه به‌تنهایی برای تصمیم کافی نیست.'}else{$('signal').textContent='سیگنال ترکیبی / نامشخص';$('signal').className='signal gold';$('reason').textContent='شاخص‌ها هم‌جهت نیستند یا بازار در محدوده افراطی است؛ از نتیجه‌گیری عجولانه پرهیز کن.'}}
+ else{$('signal').textContent='داده کافی نیست';$('signal').className='signal blue';$('reason').textContent='برای این نسخه، معاملات اخیر کافی نیستند؛ به تاریخچهٔ کندل‌ها و بک‌تست نیاز داریم.'}
+}
+function renderLedger(){
+ const rows=loadLedger();$('ledger').innerHTML=rows.length?rows.slice().reverse().slice(0,20).map(x=>`<tr><td class="${x.side==='خرید'?'green':'red'}">${x.side}</td><td>${fmt(x.price,8)}</td><td>${fmt(x.qty,8)}</td><td>${fmt(x.total,4)}</td><td>${new Date(x.time).toLocaleString('fa-IR')}</td></tr>`).join(''):'<tr><td colspan="5">هنوز معامله‌ای ثبت نشده</td></tr>';
+ const buys=rows.filter(x=>x.side==='خرید'), sells=rows.filter(x=>x.side==='فروش');
+ const qty=buys.reduce((s,x)=>s+x.qty,0)-sells.reduce((s,x)=>s+x.qty,0);
+ const cost=buys.reduce((s,x)=>s+x.total,0)-sells.reduce((s,x)=>s+x.total,0);
+ const holding=Math.max(0,qty* (lastPrice||0)); const pnl=holding-cost;
+ $('holding').textContent=fmt(holding,2)+' '+quote();$('pnl').textContent=fmt(pnl,2)+' '+quote();$('pnl').className='value '+(pnl>0?'green':pnl<0?'red':'');
+}
+async function refresh(){
+ symbol=$('symbol').value;$('refresh').disabled=true;$('status').textContent='در حال دریافت…';
+ try{
+  const infoRes=await fetch(API+'exchangeInfo?symbol='+encodeURIComponent(symbol),{cache:'no-store'});
+  if(!infoRes.ok)throw Error('دریافت فهرست بازار ناموفق بود ('+infoRes.status+')');
+  const info=await infoRes.json();let market=Array.isArray(info)?info[0]:(info.symbols?.[0]||info);
+  if(!market||market.status==='BREAK')throw Error('این بازار در فهرست فعال پیدا نشد');
+  const tradeRes=await fetch(API+'trades?symbol='+encodeURIComponent(symbol)+'&limit=100',{cache:'no-store'});
+  if(!tradeRes.ok)throw Error('دریافت معاملات اخیر ناموفق بود ('+tradeRes.status+')');
+  const tr=await tradeRes.json();if(!Array.isArray(tr)||!tr.length)throw Error('معاملات اخیر در پاسخ پیدا نشد');
+  lastTrades=tr.filter(t=>Number(t.price)>0);lastPrice=Number(lastTrades[0].price);
+  if(!Number.isFinite(lastPrice))throw Error('قیمت دریافت‌شده معتبر نیست');
+  $('price').textContent=fmt(lastPrice,quote()==='تومان'?0:8);$('unit').textContent=symbol+' · واحد قیمت: '+quote();
+  $('status').textContent='اتصال موفق به تبدیل';$('status').className='value green';$('updated').textContent='آخرین بررسی: '+new Date().toLocaleString('fa-IR');
+  $('trades').innerHTML=lastTrades.slice(0,12).map(t=>`<tr><td>${fmt(t.price,8)}</td><td>${fmt(t.qty,8)}</td><td>${new Date(Number(t.time)).toLocaleTimeString('fa-IR')}</td><td class="${t.isBuyerMaker?'red':'green'}">${t.isBuyerMaker?'فروشنده آغازگر':'خریدار آغازگر'}</td></tr>`).join('');
+  paintAnalysis();renderLedger();$('paperStatus').textContent='قیمت واقعی آخرین معامله دریافت شد؛ معاملات فرضی آماده‌اند.';
+ }catch(e){$('status').textContent='دریافت داده ناموفق';$('status').className='value red';$('updated').textContent=e.message+' · ممکن است API یا شبکه محدودیت داشته باشد.';$('price').textContent='—';lastPrice=null;$('signal').textContent='تحلیل غیرفعال';$('reason').textContent='بدون داده واقعی، قیمت یا سیگنال جایگزین ساخته نمی‌شود.'}
+ finally{$('refresh').disabled=false}
+}
+function paper(side){
+ if(!lastPrice){$('paperStatus').textContent='اول قیمت واقعی بازار را دریافت کن.';return}
+ const rows=loadLedger(), fee=Math.max(0,Number($('fee').value)||0)/100, capital=Math.max(0,Number($('capital').value)||0);
+ const buys=rows.filter(x=>x.side==='خرید'),sells=rows.filter(x=>x.side==='فروش');
+ const held=Math.max(0,buys.reduce((s,x)=>s+x.qty,0)-sells.reduce((s,x)=>s+x.qty,0));
+ let qty,total;
+ if(side==='خرید'){total=capital;qty=(capital*(1-fee))/lastPrice;if(qty<=0){$('paperStatus').textContent='مبلغ سرمایه نامعتبر است.';return}}
+ else{if(held<=0){$('paperStatus').textContent='دارایی فرضی برای فروش وجود ندارد.';return}qty=held;total=qty*lastPrice*(1-fee)}
+ rows.push({side,price:lastPrice,qty,total,time:Date.now(),fee});saveLedger(rows);renderLedger();$('paperStatus').textContent=side+' فرضی ثبت شد؛ هیچ سفارش واقعی ارسال نشده است.';
+}
+$('refresh').addEventListener('click',refresh);
+$('symbol').addEventListener('change',()=>{lastPrice=null;refresh();renderLedger()});
+$('buy').addEventListener('click',()=>paper('خرید'));$('sell').addEventListener('click',()=>paper('فروش'));
+$('clear').addEventListener('click',()=>{if(confirm('دفتر معاملات فرضی این بازار پاک شود؟')){saveLedger([]);renderLedger();$('paperStatus').textContent='دفتر فرضی پاک شد.'}});
+$('auto').addEventListener('click',()=>{autoOn=!autoOn;$('auto').textContent='به‌روزرسانی خودکار: '+(autoOn?'روشن':'خاموش');if(timer)clearInterval(timer);timer=autoOn?setInterval(refresh,30000):null});
+renderLedger();refresh();
+</script></body></html>
